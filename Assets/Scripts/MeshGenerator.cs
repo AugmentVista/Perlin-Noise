@@ -6,15 +6,15 @@ using UnityEngine;
 [RequireComponent(typeof(MeshFilter))]
 public class MeshGenerator : MonoBehaviour
 {
-    Mesh mesh;
+    private Mesh mesh;
 
-    Vector3[] vertices;
+    private Vector3[] vertices;
 
-    int[] triangles;
+    private int[] triangles;
 
-    public int gridX = 25;
+    public int gridX;
 
-    public int gridZ = 25;
+    public int gridZ;
 
     public float xIntensity;
 
@@ -28,7 +28,6 @@ public class MeshGenerator : MonoBehaviour
         mesh = new Mesh();
         GetComponent<MeshFilter>().mesh = mesh;
 
-        CreateShape();
         StartCoroutine(CreateShape());
     }
 
@@ -73,7 +72,6 @@ public class MeshGenerator : MonoBehaviour
             }
             vertex++;
         }
-           
     }
 
     void UpdateMesh()

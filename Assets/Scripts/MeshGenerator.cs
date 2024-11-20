@@ -12,9 +12,9 @@ public class MeshGenerator : MonoBehaviour
 
     int[] triangles;
 
-    int gridX = 20;
+    int gridX = 25;
 
-    int gridZ = 20;
+    int gridZ = 25;
 
 
     void Start()
@@ -39,7 +39,8 @@ public class MeshGenerator : MonoBehaviour
         {
             for (int x = 0; x <= gridX; x++)
             {
-                vertices[i] = new Vector3(x,0,z);
+                float y = Mathf.PerlinNoise(x * 0.1f, z * 0.75f) * 2f;
+                vertices[i] = new Vector3(x,y,z);
                 i++;
             }
         }
@@ -48,19 +49,25 @@ public class MeshGenerator : MonoBehaviour
 
         int vertex = 0;
         int tris = 0;
-        for (int x = 0; x < gridX; x++)
-        {
-            triangles[tris + 0] = vertex + 0;
-            triangles[tris + 1] = vertex + gridX + 1;
-            triangles[tris + 2] = vertex + 1;
-            triangles[tris + 3] = vertex + 1;
-            triangles[tris + 4] = vertex + gridX + 1;
-            triangles[tris + 5] = vertex + gridX + 2;
 
+        for (int z = 0; z < gridZ; z++)
+        {
+            for (int x = 0; x < gridX; x++)
+            {
+                triangles[tris + 0] = vertex + 0;
+                triangles[tris + 1] = vertex + gridX + 1;
+                triangles[tris + 2] = vertex + 1;
+                triangles[tris + 3] = vertex + 1;
+                triangles[tris + 4] = vertex + gridX + 1;
+                triangles[tris + 5] = vertex + gridX + 2;
+
+                vertex++;
+                tris += 6;
+                yield return new WaitForSeconds(.005f);
+            }
             vertex++;
-            tris += 6;
-            yield return new WaitForSeconds(.1f);
         }
+           
     }
 
     void UpdateMesh()
@@ -73,16 +80,16 @@ public class MeshGenerator : MonoBehaviour
         mesh.RecalculateNormals();
     }
 
-    private void OnDrawGizmos()
-    {
-        if (vertices == null)
-            return;
+    //private void OnDrawGizmos()
+    //{
+    //    if (vertices == null)
+    //        return;
 
-        for (int i = 0; i < vertices.Length; i++)
-        {
-            Gizmos.DrawSphere(vertices[i], .1f);
-        }
-    }
+    //    for (int i = 0; i < vertices.Length; i++)
+    //    {
+    //        Gizmos.DrawSphere(vertices[i], .1f);
+    //    }
+    //}
 
 
 }

@@ -12,9 +12,15 @@ public class MeshGenerator : MonoBehaviour
 
     int[] triangles;
 
-    int gridX = 25;
+    public int gridX = 25;
 
-    int gridZ = 25;
+    public int gridZ = 25;
+
+    public float xIntensity;
+
+    public float zIntensity;
+
+    public float yIntensity;
 
 
     void Start()
@@ -39,7 +45,7 @@ public class MeshGenerator : MonoBehaviour
         {
             for (int x = 0; x <= gridX; x++)
             {
-                float y = Mathf.PerlinNoise(x * 0.1f, z * 0.75f) * 2f;
+                float y = Mathf.PerlinNoise(x * xIntensity, z * zIntensity) * yIntensity;
                 vertices[i] = new Vector3(x,y,z);
                 i++;
             }
@@ -63,7 +69,7 @@ public class MeshGenerator : MonoBehaviour
 
                 vertex++;
                 tris += 6;
-                yield return new WaitForSeconds(.005f);
+                yield return new WaitForSeconds(.0001f);
             }
             vertex++;
         }
@@ -79,17 +85,6 @@ public class MeshGenerator : MonoBehaviour
 
         mesh.RecalculateNormals();
     }
-
-    //private void OnDrawGizmos()
-    //{
-    //    if (vertices == null)
-    //        return;
-
-    //    for (int i = 0; i < vertices.Length; i++)
-    //    {
-    //        Gizmos.DrawSphere(vertices[i], .1f);
-    //    }
-    //}
 
 
 }

@@ -22,15 +22,18 @@ public class MeshGenerator : MonoBehaviour
         mesh = new Mesh();
         GetComponent<MeshFilter>().mesh = mesh;
 
-
         CreateShape();
+        StartCoroutine(CreateShape());
+    }
+
+    private void Update()
+    {
         UpdateMesh();
     }
 
-    void CreateShape()
+    IEnumerator CreateShape()
     {
         vertices = new Vector3[(gridX + 1) * (gridZ + 1)];
-
 
         for (int i = 0, z = 0; z <= gridZ; z++)
         {
@@ -39,6 +42,24 @@ public class MeshGenerator : MonoBehaviour
                 vertices[i] = new Vector3(x,0,z);
                 i++;
             }
+        }
+
+        triangles = new int[gridX * gridZ * 6];
+
+        int vertex = 0;
+        int tris = 0;
+        for (int x = 0; x < gridX; x++)
+        {
+            triangles[tris + 0] = vertex + 0;
+            triangles[tris + 1] = vertex + gridX + 1;
+            triangles[tris + 2] = vertex + 1;
+            triangles[tris + 3] = vertex + 1;
+            triangles[tris + 4] = vertex + gridX + 1;
+            triangles[tris + 5] = vertex + gridX + 2;
+
+            vertex++;
+            tris += 6;
+            yield return new WaitForSeconds(.1f);
         }
     }
 
@@ -51,7 +72,6 @@ public class MeshGenerator : MonoBehaviour
 
         mesh.RecalculateNormals();
     }
-
 
     private void OnDrawGizmos()
     {

@@ -12,11 +12,16 @@ public class MeshGenerator : MonoBehaviour
 
     int[] triangles;
 
+    int gridX = 20;
+
+    int gridZ = 20;
+
 
     void Start()
     {
         mesh = new Mesh();
         GetComponent<MeshFilter>().mesh = mesh;
+
 
         CreateShape();
         UpdateMesh();
@@ -24,19 +29,17 @@ public class MeshGenerator : MonoBehaviour
 
     void CreateShape()
     {
-        vertices = new Vector3[]
-        {
-            new Vector3(0,0,0),
-            new Vector3(0,0,1),
-            new Vector3(1,0,0),
-            new Vector3(1,0,1),
-        };
+        vertices = new Vector3[(gridX + 1) * (gridZ + 1)];
 
-        triangles = new int[]
+
+        for (int i = 0, z = 0; z <= gridZ; z++)
         {
-            0, 1, 2,
-            1, 3, 2
-        };
+            for (int x = 0; x <= gridX; x++)
+            {
+                vertices[i] = new Vector3(x,0,z);
+                i++;
+            }
+        }
     }
 
     void UpdateMesh()
@@ -47,6 +50,18 @@ public class MeshGenerator : MonoBehaviour
         mesh.triangles = triangles;
 
         mesh.RecalculateNormals();
+    }
+
+
+    private void OnDrawGizmos()
+    {
+        if (vertices == null)
+            return;
+
+        for (int i = 0; i < vertices.Length; i++)
+        {
+            Gizmos.DrawSphere(vertices[i], .1f);
+        }
     }
 
 

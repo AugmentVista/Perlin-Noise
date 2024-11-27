@@ -12,16 +12,38 @@ public class MeshGenerator : MonoBehaviour
 
     private int[] triangles;
 
+    Vector2[] uvs;
+
     public int gridX;
 
     public int gridZ;
 
-    public float xIntensity;
 
-    public float zIntensity;
+    public int textureWidth = 1024;
+    public int textureHeight = 1024;
+
+    private float noise01Scale = 0.2f;
+    private float noise01Amp = 0.2f;
+
+    private float noise02Scale = 0.4f;
+    private float noise02Amp = 0.4f;
+
+    private float noise03Scale = 0.6f;
+    private float noise03Amp = 0.6f;
+
+    [Header("Noise Settings")]
+    public int octaves = 4;
+    [Range(0, 1)]
+    public float persistence = 0.5f; // Amplitude multiplier per octave
+    public float baseFrequency = 0.2f; // Starting frequency
+    public float baseAmplitude = 1.0f; // Starting amplitude
+    public int seed = 0;
+
 
     public float yIntensity;
 
+
+    private Vector2 offset;
 
     void Start()
     {
@@ -33,6 +55,7 @@ public class MeshGenerator : MonoBehaviour
 
     private void Update()
     {
+        CreateShape();
         UpdateMesh();
     }
 
@@ -44,7 +67,8 @@ public class MeshGenerator : MonoBehaviour
         {
             for (int x = 0; x <= gridX; x++)
             {
-                float y = Mathf.PerlinNoise(x * xIntensity, z * zIntensity) * yIntensity;
+                //float y = Mathf.PerlinNoise(x * xIntensity, z * zIntensity) * yIntensity;
+                float y = GetNoiseSample(x, z); 
                 vertices[i] = new Vector3(x,y,z);
                 i++;
             }
@@ -68,9 +92,19 @@ public class MeshGenerator : MonoBehaviour
 
                 vertex++;
                 tris += 6;
-                yield return new WaitForSeconds(.0001f);
             }
             vertex++;
+            yield return new WaitForSeconds(.01f);
+        }
+        uvs = new Vector2[vertices.Length];
+
+        for (int i = 0, z = 0; z <= gridZ; z++)
+        {
+            for (int x = 0; x <= gridX; x++)
+            {
+                uvs[i] = new Vector2((float)x / gridX, (float)z / gridZ);
+                i++;
+            }
         }
     }
 
@@ -80,8 +114,45 @@ public class MeshGenerator : MonoBehaviour
 
         mesh.vertices = vertices;
         mesh.triangles = triangles;
+        mesh.uv = uvs;
+
 
         mesh.RecalculateNormals();
+    }
+
+    float GetNoiseSample(int x, int z)
+    {
+        float amplitude = baseAmplitude;
+        float frequency = baseFrequency;
+        float noiseHeight = 0f;
+
+        // Calculate the maximum possible height for normalization
+        float maxPossibleHeight = 0f;
+        for (int i = 0; i < octaves; i++)
+        {
+            maxPossibleHeight += amplitude;
+            amplitude *= persistence;
+        }
+
+        amplitude = baseAmplitude;
+        frequency = baseFrequency;
+
+        for (int i = 0; i < octaves; i++)
+        {
+            float sampleX = (x + offset.x) * frequency;
+            float sampleZ = (z + offset.y) * frequency;
+
+            float perlinValue = Mathf.PerlinNoise(sampleX, sampleZ);
+            noiseHeight += perlinValue * amplitude;
+
+            amplitude *= persistence; // Decrease amplitude for next octave
+            frequency *= 2; // Increase frequency for next octave
+        }
+
+        // Normalize the result to [0, 1]
+        noiseHeight /= maxPossibleHeight;
+
+        return noiseHeight * yIntensity;
     }
 
 

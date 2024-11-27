@@ -8,16 +8,18 @@ public class MeshGenerator : MonoBehaviour
 {
     private Mesh mesh;
 
+    public Gradient gradient;
+
     private Vector3[] vertices;
+    Vector2[] uvs;
+    Vector2 offset;
+
+    Color[] colors;
 
     private int[] triangles;
 
-    Vector2[] uvs;
-
     public int gridX;
-
     public int gridZ;
-
 
     public int textureWidth = 1024;
     public int textureHeight = 1024;
@@ -39,11 +41,12 @@ public class MeshGenerator : MonoBehaviour
     public float baseAmplitude = 1.0f; // Starting amplitude
     public int seed = 0;
 
-
     public float yIntensity;
 
+    float minTerrainHeight;
+    float maxTerrainHeight;
+    float maxPossibleHeight = 0f;
 
-    private Vector2 offset;
 
     void Start()
     {
@@ -67,9 +70,17 @@ public class MeshGenerator : MonoBehaviour
         {
             for (int x = 0; x <= gridX; x++)
             {
-                //float y = Mathf.PerlinNoise(x * xIntensity, z * zIntensity) * yIntensity;
                 float y = GetNoiseSample(x, z); 
                 vertices[i] = new Vector3(x,y,z);
+
+                maxTerrainHeight = maxPossibleHeight;
+
+                if (y > maxTerrainHeight)
+                    maxTerrainHeight = y;
+
+                if (y < minTerrainHeight)
+                    minTerrainHeight = y;
+
                 i++;
             }
         }
@@ -96,13 +107,15 @@ public class MeshGenerator : MonoBehaviour
             vertex++;
             yield return new WaitForSeconds(.01f);
         }
-        uvs = new Vector2[vertices.Length];
+
+        colors = new Color[vertices.Length];
 
         for (int i = 0, z = 0; z <= gridZ; z++)
         {
             for (int x = 0; x <= gridX; x++)
             {
-                uvs[i] = new Vector2((float)x / gridX, (float)z / gridZ);
+                float height = Mathf.InverseLerp(minTerrainHeight, maxTerrainHeight, vertices[i].y);
+                colors[i] = gradient.Evaluate(height);
                 i++;
             }
         }
@@ -114,8 +127,7 @@ public class MeshGenerator : MonoBehaviour
 
         mesh.vertices = vertices;
         mesh.triangles = triangles;
-        mesh.uv = uvs;
-
+        mesh.colors = colors;
 
         mesh.RecalculateNormals();
     }
@@ -127,7 +139,7 @@ public class MeshGenerator : MonoBehaviour
         float noiseHeight = 0f;
 
         // Calculate the maximum possible height for normalization
-        float maxPossibleHeight = 0f;
+        
         for (int i = 0; i < octaves; i++)
         {
             maxPossibleHeight += amplitude;

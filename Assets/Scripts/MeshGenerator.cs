@@ -2,36 +2,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-
 [RequireComponent(typeof(MeshFilter))]
 public class MeshGenerator : MonoBehaviour
 {
     private Mesh mesh;
 
-    public Gradient gradient;
-
     private Vector3[] vertices;
-    Vector2[] uvs;
-    Vector2 offset;
-
-    Color[] colors;
 
     private int[] triangles;
 
     public int gridX;
+
     public int gridZ;
 
     public int textureWidth = 1024;
     public int textureHeight = 1024;
-
-    private float noise01Scale = 0.2f;
-    private float noise01Amp = 0.2f;
-
-    private float noise02Scale = 0.4f;
-    private float noise02Amp = 0.4f;
-
-    private float noise03Scale = 0.6f;
-    private float noise03Amp = 0.6f;
 
     [Header("Noise Settings")]
     public int octaves = 4;
@@ -39,14 +24,10 @@ public class MeshGenerator : MonoBehaviour
     public float persistence = 0.5f; // Amplitude multiplier per octave
     public float baseFrequency = 0.2f; // Starting frequency
     public float baseAmplitude = 1.0f; // Starting amplitude
-    public int seed = 0;
 
     public float yIntensity;
 
-    float minTerrainHeight;
-    float maxTerrainHeight;
-    float maxPossibleHeight = 0f;
-
+    private Vector2 offset;
 
     void Start()
     {
@@ -70,17 +51,8 @@ public class MeshGenerator : MonoBehaviour
         {
             for (int x = 0; x <= gridX; x++)
             {
-                float y = GetNoiseSample(x, z); 
+                float y = GetNoiseSample(x, z); // y is between 0 - 1 as a result of float noiseHeight / maxHeight
                 vertices[i] = new Vector3(x,y,z);
-
-                maxTerrainHeight = maxPossibleHeight;
-
-                if (y > maxTerrainHeight)
-                    maxTerrainHeight = y;
-
-                if (y < minTerrainHeight)
-                    minTerrainHeight = y;
-
                 i++;
             }
         }
@@ -108,14 +80,10 @@ public class MeshGenerator : MonoBehaviour
             yield return new WaitForSeconds(.01f);
         }
 
-        colors = new Color[vertices.Length];
-
         for (int i = 0, z = 0; z <= gridZ; z++)
         {
             for (int x = 0; x <= gridX; x++)
             {
-                float height = Mathf.InverseLerp(minTerrainHeight, maxTerrainHeight, vertices[i].y);
-                colors[i] = gradient.Evaluate(height);
                 i++;
             }
         }
@@ -127,7 +95,7 @@ public class MeshGenerator : MonoBehaviour
 
         mesh.vertices = vertices;
         mesh.triangles = triangles;
-        mesh.colors = colors;
+
 
         mesh.RecalculateNormals();
     }
@@ -138,8 +106,7 @@ public class MeshGenerator : MonoBehaviour
         float frequency = baseFrequency;
         float noiseHeight = 0f;
 
-        // Calculate the maximum possible height for normalization
-        
+        float maxPossibleHeight = 0f;
         for (int i = 0; i < octaves; i++)
         {
             maxPossibleHeight += amplitude;
@@ -147,7 +114,6 @@ public class MeshGenerator : MonoBehaviour
         }
 
         amplitude = baseAmplitude;
-        frequency = baseFrequency;
 
         for (int i = 0; i < octaves; i++)
         {
@@ -157,8 +123,8 @@ public class MeshGenerator : MonoBehaviour
             float perlinValue = Mathf.PerlinNoise(sampleX, sampleZ);
             noiseHeight += perlinValue * amplitude;
 
-            amplitude *= persistence; // Decrease amplitude for next octave
-            frequency *= 2; // Increase frequency for next octave
+            amplitude *= persistence;
+            frequency *= 2;
         }
 
         // Normalize the result to [0, 1]
@@ -166,6 +132,4 @@ public class MeshGenerator : MonoBehaviour
 
         return noiseHeight * yIntensity;
     }
-
-
 }

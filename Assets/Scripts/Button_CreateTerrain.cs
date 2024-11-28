@@ -27,11 +27,11 @@ public class Button_CreateTerrain : MonoBehaviour
 
         switch (isEvenOrOdd)
         {
-            case 0: // this happens second
+            case 0:
                 Instantiate(Terrain, new Vector3(newPosition.x + xOffset, newPosition.y, newPosition.z), Quaternion.identity);
                 Debug.Log("yeah");
                 break;
-            case 1: // this happens first
+            case 1:
                 xOffset += xIncrement;
                 Instantiate(Terrain, new Vector3(newPosition.x + xOffset, newPosition.y, newPosition.z += zOffset), Quaternion.identity);
                 break;

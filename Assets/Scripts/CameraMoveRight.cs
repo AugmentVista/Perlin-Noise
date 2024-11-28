@@ -10,10 +10,17 @@ public class CameraMoveRight : MonoBehaviour
     Vector3 newPosition;
 
 
-    public void MoveCamera()
+    public void MoveCameraRight()
     {
         newPosition = mainCamera.transform.position;
         newPosition.x += xIncrement = TerrainX.GetComponent<MeshGenerator>().gridX;
+        mainCamera.transform.position = newPosition;
+    }
+
+    public void MoveCameraLeft()
+    {
+        newPosition = mainCamera.transform.position;
+        newPosition.x -= xIncrement = TerrainX.GetComponent<MeshGenerator>().gridX;
         mainCamera.transform.position = newPosition;
     }
 }

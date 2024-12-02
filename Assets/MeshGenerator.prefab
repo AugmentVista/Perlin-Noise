@@ -102,7 +102,7 @@ MonoBehaviour:
   textureWidth: 1024
   textureHeight: 1024
   octaves: 20
-  persistence: 0.547
+  persistence: 0.5
   baseFrequency: 0.1
   baseAmplitude: 0.5
   yIntensity: 20
